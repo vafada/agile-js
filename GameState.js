@@ -2,7 +2,7 @@ class GameState {
 
     /**
      * Constructor for GameState.
-     * 
+     *
      * @param game The Game from which we'll get all of the game data.
      */
     constructor(game) {
@@ -14,9 +14,9 @@ class GameState {
         this.controllers = [];
 
         /**
-         * Scan start values for each Logic. Index is the Logic number. We normally start 
+         * Scan start values for each Logic. Index is the Logic number. We normally start
          * scanning the Logic at position 0, but this can be set to another  value via the
-         * set.scan.start AGI command. Note that only loaded logics can have their scan 
+         * set.scan.start AGI command. Note that only loaded logics can have their scan
          * offset set. When they are unloaded, their scan offset is forgotten. Logic 0 is
          * always loaded, so its scan start is never forgotten.
          */
@@ -34,8 +34,8 @@ class GameState {
         this.currentInput = "";
         this.lastInput = "";
         this.simpleName = "";
-        this.gameId = (game.v3GameSig != null? game.v3GameSig : "UNKNOWN");
-        this.version = (game.version === "Unknown"? "2.917" : game.version);
+        this.gameId = (game.v3GameSig != null ? game.v3GameSig : "UNKNOWN");
+        this.version = (game.version === "Unknown" ? "2.917" : game.version);
         this.menuEnabled = true;
         this.holdKey = false;
         this.acceptInput = false;
@@ -59,7 +59,7 @@ class GameState {
 
         /**
          * Indicates that a block has been set.
-         */        
+         */
         this.blocking = false;
 
         this.blockUpperLeftX = 0;
@@ -74,7 +74,7 @@ class GameState {
 
         /**
          * The List of recognised words from the current user input line.
-         */        
+         */
         this.recognisedWords = [];
 
         /**
@@ -84,7 +84,7 @@ class GameState {
 
         /**
          * The pixel array for the visual data for the current Picture, where the values
-         * are the ARGB values. The dimensions of this are 320x168, i.e. two pixels per 
+         * are the ARGB values. The dimensions of this are 320x168, i.e. two pixels per
          * AGI pixel. Makes it easier to copy to the main pixels array when required.
          */
         this.visualPixels = [];
@@ -100,7 +100,7 @@ class GameState {
          * The pixel array for the control line data for the current Picture, where the
          * values are from 0 to 4 (i.e. not ARGB values). The dimensions of this one
          * are 160x168 as its usage is non-visual.
-         */        
+         */
         this.controlPixels = [];
 
         /**
@@ -114,13 +114,12 @@ class GameState {
          * Whether or not the picture is currently visible. This is set to true after a
          * show.pic call. The draw.pic and overlay.pic commands both set it to false. It's
          * value is used to determine whether to render the AnimatedObjects.
-         */        
+         */
         this.pictureVisible = false;
 
         // Create and initialise all of the AnimatedObject entries.
         this.animatedObjects = [];
-        for (let i=0; i < Defines.NUMANIMATED; i++)
-        {
+        for (let i = 0; i < Defines.NUMANIMATED; i++) {
             this.animatedObjects[i] = new AnimatedObject(this, i);
         }
 
@@ -136,10 +135,18 @@ class GameState {
 
         // Store resources in arrays indexed by number for easy lookup.
         for (let volume of game.volumes) {
-            for (let [index, logic] of volume.logics.entries()) { this.logics[index] = logic; }
-            for (let [index, picture] of volume.pictures.entries()) { this.pictures[index] = picture; }
-            for (let [index, view] of volume.views.entries()) { this.views[index] = view; }
-            for (let [index, sound] of volume.sounds.entries()) { this.sounds[index] = sound; }
+            for (let [index, logic] of volume.logics.entries()) {
+                this.logics[index] = logic;
+            }
+            for (let [index, picture] of volume.pictures.entries()) {
+                this.pictures[index] = picture;
+            }
+            for (let [index, view] of volume.views.entries()) {
+                this.views[index] = view;
+            }
+            for (let [index, sound] of volume.sounds.entries()) {
+                this.sounds[index] = sound;
+            }
         }
 
         // Logic 0 is always marked as loaded. It never gets unloaded.
@@ -244,8 +251,78 @@ class GameState {
      * Clears the VisualPixels screen to it's initial black state.
      */
     clearVisualPixels() {
-        for (let i=0; i < this.visualPixels.length; i++) {
+        for (let i = 0; i < this.visualPixels.length; i++) {
             this.visualPixels[i] = AGI_PALETTE[0];
+        }
+    }
+
+    restoreBackgrounds(restoreList) {
+        for (let aniObj of restoreList) {
+            aniObj.reset(true);
+        }
+    }
+
+    makeUpdateObjectList() {
+        return this.makeObjectDrawList(this.updateObjectList, true);
+    }
+
+    makeObjectDrawList(objsToDraw, updating) {
+        objsToDraw = [];
+
+        for (let aniObj of this.animatedObjects) {
+            if (aniObj.drawn && aniObj.update === updating) {
+                objsToDraw.push(aniObj);
+            }
+        }
+
+        objsToDraw.sort((a, b) => {
+            if (a.priority < b.priority) {
+                return -1;
+            }
+            else if (a.priority > b.priority) {
+                return 1;
+            }
+            else {
+                if (a.effectiveY() < b.effectiveY()) {
+                    return -1;
+                }
+                else if (a.effectiveY() > b.effectiveY()) {
+                    return 1;
+                }
+                else {
+                    return 0;
+                }
+            }
+        })
+
+
+
+        return objsToDraw;
+    }
+
+    drawObjects(objectDrawList) {
+        for (let aniObj of objectDrawList) {
+            aniObj.draw();
+        }
+    }
+
+    showObjects(pixels, objectShowList) {
+        for (let aniObj of objectShowList) {
+            aniObj.show(pixels);
+
+            if (aniObj.stepTimeCount === aniObj.stepTime)
+            {
+                if ((aniObj.x === aniObj.prevX) && (aniObj.y === aniObj.prevY))
+                {
+                    aniObj.stopped = true;
+                }
+                else
+                {
+                    aniObj.prevX = aniObj.x;
+                    aniObj.prevY = aniObj.y;
+                    aniObj.stopped = false;
+                }
+            }
         }
     }
 }

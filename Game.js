@@ -38,8 +38,10 @@ class Game {
                 dirFile.read(readBuffer, 0, 3);
 
                 // Check if there is a resource at this position
-                if (readBuffer[0] == 0xFF && readBuffer[1] == 0xFF && readBuffer[2] == 0xFF)
-                continue;
+                // SQ1 SNDDIR first entry has FF23C1 (F = 15 and vol 15 doesn't exists)
+                if (readBuffer[0] == 0xFF) {
+                    continue;
+                }
 
                 // Get volume number that contains the resource
                 let volNum = (readBuffer[0] & 0xF0) >> 4;

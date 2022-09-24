@@ -251,12 +251,12 @@ class Interpreter {
             aniObj.updateLoopAndCel();
         }
 
-        this.state.Vars[Defines.EGOEDGE] = 0;
-        this.state.Vars[Defines.OBJHIT] = 0;
-        this.state.Vars[Defines.OBJEDGE] = 0;
+        this.state.vars[Defines.EGOEDGE] = 0;
+        this.state.vars[Defines.OBJHIT] = 0;
+        this.state.vars[Defines.OBJEDGE] = 0;
 
         // Restore the backgrounds of the previous drawn cels for each AnimatedObject.
-        this.state.restoreBackgrounds(this.state.updateObjectList);
+         this.state.restoreBackgrounds(this.state.updateObjectList);
 
         // Ask each AnimatedObject to move if it needs to.
         for (let aniObj of this.state.animatedObjects) {

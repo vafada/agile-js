@@ -136,16 +136,24 @@ class GameState {
         // Store resources in arrays indexed by number for easy lookup.
         for (let volume of game.volumes) {
             for (let [index, logic] of volume.logics.entries()) {
-                this.logics[index] = logic;
+                if (logic != null) {
+                    this.logics[index] = logic;
+                }
             }
             for (let [index, picture] of volume.pictures.entries()) {
-                this.pictures[index] = picture;
+                if (picture != null) {
+                    this.pictures[index] = picture;
+                }
             }
             for (let [index, view] of volume.views.entries()) {
-                this.views[index] = view;
+                if (view != null) {
+                    this.views[index] = view;
+                }
             }
             for (let [index, sound] of volume.sounds.entries()) {
-                this.sounds[index] = sound;
+                if (sound != null) {
+                    this.sounds[index] = sound;
+                }
             }
         }
 

@@ -151,7 +151,7 @@ class Interpreter {
      */
     newRoom(roomNum) {
         // Has the room changed?
-        if (roomNum == this.state.currentRoom) return false;
+        if (roomNum === this.state.currentRoom) return false;
 
         // Simulate a slow room change if there is a text window open.
         if (this.textGraphics.isWindowOpen()) {

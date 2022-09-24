@@ -421,31 +421,31 @@ class Operand {
      * Gets the Operand's value as an int.
      */
     asInt() {
-        return (value & 0xFFFFFFFF);
+        return (this.value & 0xFFFFFFFF);
     }
 
     /**
      * Gets the Operand's value as a short.
      */
     asShort() {
-        return (value & 0xFFFF);
+        return (this.value & 0xFFFF);
     }
 
     /**
      * Gets the Operand's value as a byte.
      */
     asByte() {
-        return (value & 0xFF);
+        return (this.value & 0xFF);
     }
 
     /**
      * Gets the Operand's value as a signed byte.
      */
     asSByte() {
-        if ((value & 0x80) == 0x80) {
-            return ((~value + 1) & 0xFF);
+        if ((this.value & 0x80) == 0x80) {
+            return ((~this.value + 1) & 0xFF);
         } else {
-            return value;
+            return this.value;
         }
     }
 
@@ -453,21 +453,21 @@ class Operand {
      * Gets the Operand's value as a Condition.
      */
     asCondition()  {
-        return value;
+        return this.value;
     }
 
     /**
      * Gets the Operand's value as a List of Conditions.
      */
     asConditions() {
-        return value;
+        return this.value;
     }
 
     /**
      * Gets the Operand's value as a List of ints.
      */
     asInts() {
-        return value;
+        return this.value;
     }
 }
 

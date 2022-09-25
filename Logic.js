@@ -301,7 +301,7 @@ class GotoAction extends JumpAction {
     }
 
     getDestinationAddress() {
-        return this.operands[0].asInt();
+        return this.operands[0].asShort();
     }
 }
 
@@ -527,7 +527,7 @@ const ACTION_OPERATIONS = [
     new Operation(28, "overlay.pic(VAR)"),
     new Operation(29, "show.pri.screen()"),
     new Operation(30, "load.view(VIEW)"),
-    new Operation(31, "load.view.f(VAR)"),
+    new Operation(31, "load.view.v(VAR)"),
     new Operation(32, "discard.view(VIEW)"),
     new Operation(33, "animate.obj(OBJECT)"),
     new Operation(34, "unanimate.all()"),

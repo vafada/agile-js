@@ -1,7 +1,8 @@
 class ScriptBuffer {
 
     constructor() {
-        
+        this.scriptSize = 0;
+        this.events = [];
     }
 
     /**
@@ -13,5 +14,10 @@ class ScriptBuffer {
      */
     addScript(action, who, data = null) {
 
+    }
+
+    setScriptSize(scriptSize) {
+        this.scriptSize = scriptSize;
+        this.events = [];
     }
 }

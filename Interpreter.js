@@ -211,7 +211,8 @@ class Interpreter {
         // which is why we also track the CurrentRoom in a separate state variable. We can't rely
         // on the AGI VAR that stores the current room.
         this.state.vars[Defines.PREVROOM] = this.state.currentRoom;
-        this.state.vars[Defines.CURROOM] = this.state.currentRoom = roomNum;
+        this.state.currentRoom = roomNum;
+        this.state.vars[Defines.CURROOM] = roomNum;
 
         // Set flags and vars as appropriate for a new room.
         this.state.vars[Defines.OBJHIT] = 0;

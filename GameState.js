@@ -20,7 +20,7 @@ class GameState {
          * offset set. When they are unloaded, their scan offset is forgotten. Logic 0 is
          * always loaded, so its scan start is never forgotten.
          */
-        this.scanStart = [];
+        this.scanStart = new Array(256).fill(0);
 
         this.logics = [];
         this.pictures = [];

@@ -519,7 +519,7 @@ const ACTION_OPERATIONS = [
     new Operation(20, "load.logics(NUM)"),
     new Operation(21, "load.logics.f(VAR)"),
     new Operation(22, "call(NUM)"),
-    new Operation(23, "call.f(VAR)"),
+    new Operation(23, "call.v(VAR)"),
     new Operation(24, "load.pic(VAR)"),
     new Operation(25, "draw.pic(VAR)"),
     new Operation(26, "show.pic()"),

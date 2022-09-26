@@ -251,7 +251,6 @@ class Interpreter {
      * involves the cell cycling, the movement, and the drawing to the screen.
      */
     animateObjects() {
-        console.log("this.state.animatedObjects = " + this.state.animatedObjects);
         // Ask each AnimatedObject to update its loop and cell number if required.
         for (let aniObj of this.state.animatedObjects) {
             aniObj.updateLoopAndCel();

@@ -22,14 +22,24 @@ class Picture extends Resource {
         ];
         this.visible = new Uint8Array(160 * 168);
         this.priority = new Uint8Array(160 * 168);
+
+        // Clear the buffers
+        for (var i = 0; i < 160 * 168; i++) {
+            this.visible[i] = 0x0F;
+            this.priority[i] = 0x04;
+        }
+
         this.draw();
     }
     
     setPixel(x, y, drawVis = true, drawPri = true) {
-        if (this.picEnabled && drawVis)
+        if (this.picEnabled && drawVis) {
             this.visible[y * 160 + x] = this.picColor;
-        if (this.priEnabled && drawPri)
+        }
+
+        if (this.priEnabled && drawPri) {
             this.priority[y * 160 + x] = this.priColor;
+        }
     }
 
     round(aNumber, dirn) {
@@ -150,20 +160,22 @@ class Picture extends Resource {
             let startY = this.stream.readByte();
             queue.enqueue(startX);
             queue.enqueue(startY);
+
             // Visible
-            let pos;
-            let x;
-            let y;
+            var pos;
+            var x;
+            var y;
             while (!queue.isEmpty()) {
                 x = queue.dequeue();
                 y = queue.dequeue();
                 if (this.picEnabled) {
-                    if (this.visible[y * 160 + x] != 0x0F)
+                    if (this.visible[y * 160 + x] != 0x0F) {
                         continue;
+                    }
                     this.setPixel(x, y, true, false);
                 }
                 if (this.priEnabled) {
-                    if (this.priority[y * 160 + x] != 0x04)
+                    if (this.priority[y * 168 + x] != 0x04)
                         continue;
                     this.setPixel(x, y, false, true);
                 }

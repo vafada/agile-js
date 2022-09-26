@@ -54,18 +54,17 @@ class Commands {
 
     showVisualPixels() {
         const data = this.pixels;
-        for (let k = 0; k < 320 * 200; k++) {
+        for (let k = 0; k < 160 * 168; k++) {
             //this.interpreter.framePriorityData.data[k] = this.interpreter.priorityBuffer.data[k];
             let rgb = AGI_PALETTE[this.state.visualPixels[k]];
-            data[k] = rgb;
-            /*data[k * 8] = (rgb >>> 16) & 0xFF;
+            data[k * 8] = (rgb >>> 16) & 0xFF;
             data[k * 8 + 1] = (rgb >>> 8) & 0xFF;
             data[k * 8 + 2] = rgb & 0xFF;
             data[k * 8 + 3] = 255;
             data[k * 8 + 4] = (rgb >>> 16) & 0xFF;
             data[k * 8 + 5] = (rgb >>> 8) & 0xFF;
             data[k * 8 + 6] = rgb & 0xFF;
-            data[k * 8 + 7] = 255;*/
+            data[k * 8 + 7] = 255;
         }
     }
 

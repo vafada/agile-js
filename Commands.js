@@ -91,7 +91,6 @@ class Commands {
         //this.pixels = visualBitmap;
 
 
-
         // Copy visual pixels to a 160x168 byte array.
         //const visualBitmapData = visualBitmap.LockBits(new Rectangle(0, 0, visualBitmap.Width, visualBitmap.Height), ImageLockMode.ReadWrite, visualBitmap.PixelFormat);
         //byte[] visualPixels = new byte[visualBitmapData.Stride * visualBitmapData.Height];
@@ -130,30 +129,25 @@ class Commands {
         let newRoom = this.state.currentRoom;
         let exit = false;
 
-        //let iterate = 0;
+        let data = {
+            newRoom,
+            exit,
+        }
 
         // Continually execute the Actions in the Logic until one of them tells us to exit.
         do {
-            let returnValue = this.executeAction(logic.actions[actionNum], newRoom, exit);
-            exit = returnValue.exit;
-            newRoom = returnValue.newRoom;
-            actionNum = returnValue.actionNum;
-
-            /*iterate++;
-            if (iterate == 100) {
-                exit = true;
-            }*/
-        } while (!exit)
+            actionNum = this.executeAction(logic.actions[actionNum], data);
+        } while (!data.exit)
 
         // Restore the previous Logic number before we leave.
         this.state.currentLogNum = previousLogNum;
 
         // If new.room was not one of the Actions executed, then newRoom will still have the current
         // room value; otherwise it will have the number of the new room.
-        return newRoom;
+        return data.newRoom;
     }
 
-    executeAction(action, newRoom, exit) {
+    executeAction(action, data) {
         //console.log("action", action);
 
         // Normally the next Action will be the next one in the Actions list, but this
@@ -165,10 +159,8 @@ class Commands {
         switch (action.operation.opcode) {
             // return
             case 0:
-                return {
-                    exit: true,
-                    nextActionNum: 0,
-                }
+                data.exit = true;
+                return 0;
             // increment
             case 1: {
                 const varNum = action.operands[0].asByte();
@@ -228,11 +220,9 @@ class Commands {
             // new.room
             case 18:
                 console.log("new room = " + action.operands[0].asByte());
-                return {
-                    exit: true,
-                    actionNum: 0,
-                    newRoom: action.operands[0].asByte(),
-                }
+                data.exit = true;
+                data.newRoom = action.operands[0].asByte();
+                return 0;
             // load.logics
             case 20: {
                 // All logics are already loaded in this interpreter, so nothing to do as such
@@ -247,30 +237,19 @@ class Commands {
                 break;
             // call
             case 22: {
-                let tempNewRoom = this.executeLogic(action.operands[0].asByte());
-                console.log("tempNewRoom", tempNewRoom);
-                console.log("this.state.currentRoom", this.state.currentRoom);
-                if (tempNewRoom !== this.state.currentRoom) {
-                    return {
-                        newRoom: tempNewRoom ?? this.state.currentRoom,
-                        exit: true,
-                        nextActionNum: 0,
-                    }
+                data.newRoom = this.executeLogic(action.operands[0].asByte());
+                if (data.newRoom  !== this.state.currentRoom) {
+                    data.exit = true;
+                    return 0;
                 }
             }
                 break;
             // call.v
             case 23:
-                console.log("call.v " + this.state.vars[action.operands[0].asByte()]);
-                let tempNewRoom = this.executeLogic(this.state.vars[action.operands[0].asByte()]);
-                console.log("tempNewRoom", tempNewRoom);
-                console.log("this.state.currentRoom", this.state.currentRoom);
-                if (tempNewRoom !== this.state.currentRoom) {
-                    return {
-                        newRoom: tempNewRoom ?? this.state.currentRoom,
-                        exit: true,
-                        nextActionNum: 0,
-                    }
+                data.newRoom = this.executeLogic(this.state.vars[action.operands[0].asByte()]);
+                if (data.newRoom !== this.state.currentRoom) {
+                    data.exit = true;
+                    return 0;
                 }
                 break;
             // load.pic
@@ -453,11 +432,7 @@ class Commands {
                 break;
         }
 
-        return {
-            exit,
-            actionNum: nextActionNum,
-            newRoom,
-        }
+        return nextActionNum;
     }
 
     isConditionTrue(condition) {

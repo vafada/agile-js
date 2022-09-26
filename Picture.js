@@ -32,7 +32,7 @@ class Picture extends Resource {
 
         this.draw();
     }
-    
+
     setPixel(x, y, drawVis = true, drawPri = true) {
         if (this.picEnabled && drawVis) {
             this.visible[y * 160 + x] = this.picColor;
@@ -65,8 +65,7 @@ class Picture extends Resource {
                 y += addY;
             }
             this.setPixel(x2, y2);
-        }
-        else {
+        } else {
             x = x1;
             addY = (height == 0 ? 0 : height / Math.abs(height));
             for (y = y1; y != y2; y += addY) {
@@ -153,57 +152,54 @@ class Picture extends Resource {
     }
 
     opFillFastQueue() {
-        try {
-            while (true) {
-                let queue = new FastQueue(this.picNo);
-                let startX = this.stream.readByte();
-                if (startX >= 0xF0)
-                    break;
-                let startY = this.stream.readByte();
-                queue.enqueue(startX);
-                queue.enqueue(startY);
+        while (true) {
+            let queue = new FastQueue(this.picNo);
+            let startX = this.stream.readByte();
+            if (startX >= 0xF0)
+                break;
+            let startY = this.stream.readByte();
+            queue.enqueue(startX);
+            queue.enqueue(startY);
 
-                // Visible
-                var pos;
-                var x;
-                var y;
-                while (!queue.isEmpty()) {
-                    x = queue.dequeue();
-                    y = queue.dequeue();
-                    if (this.picEnabled) {
-                        if (this.visible[y * 160 + x] != 0x0F) {
-                            continue;
-                        }
-                        this.setPixel(x, y, true, false);
+            // Visible
+            var pos;
+            var x;
+            var y;
+            while (!queue.isEmpty()) {
+                x = queue.dequeue();
+                y = queue.dequeue();
+                if (this.picEnabled) {
+                    if (this.visible[y * 160 + x] != 0x0F) {
+                        continue;
                     }
-                    if (this.priEnabled) {
-                        if (this.priority[y * 168 + x] != 0x04) {
-                            continue;
-                        }
-                        this.setPixel(x, y, false, true);
+                    this.setPixel(x, y, true, false);
+                }
+                if (this.priEnabled) {
+                    if (this.priority[y * 160 + x] != 0x04) {
+                        continue;
                     }
-                    if (x > 0) {
-                        queue.enqueue(x - 1);
-                        queue.enqueue(y);
-                    }
-                    if (x < 160 - 1) {
-                        queue.enqueue(x + 1);
-                        queue.enqueue(y);
-                    }
-                    if (y > 0) {
-                        queue.enqueue(x);
-                        queue.enqueue(y - 1);
-                    }
-                    if (y < 168 - 1) {
-                        queue.enqueue(x);
-                        queue.enqueue(y + 1);
-                    }
+                    this.setPixel(x, y, false, true);
+                }
+                if (x > 0) {
+                    queue.enqueue(x - 1);
+                    queue.enqueue(y);
+                }
+                if (x < 160 - 1) {
+                    queue.enqueue(x + 1);
+                    queue.enqueue(y);
+                }
+                if (y > 0) {
+                    queue.enqueue(x);
+                    queue.enqueue(y - 1);
+                }
+                if (y < 168 - 1) {
+                    queue.enqueue(x);
+                    queue.enqueue(y + 1);
                 }
             }
-            this.stream.position--;
-        } catch (e) {
-            //noop
         }
+        this.stream.position--;
+
     }
 
     opSetPen() {
@@ -242,17 +238,14 @@ class Picture extends Resource {
                 let x = this.stream.readByte();
                 let y = this.stream.readByte();
                 this.drawPenSplat(x, y, texNumber);
-            }
-            else {
+            } else {
                 let x = firstArg;
                 let y = this.stream.readByte();
                 if (this.penSize == 0) {
                     this.setPixel(x, y);
-                }
-                else if (this.penRectangle) {
+                } else if (this.penRectangle) {
                     this.drawPenRect(x, y);
-                }
-                else {
+                } else {
                     this.drawPenCircle(x, y);
                 }
             }
@@ -320,23 +313,26 @@ class FastQueue {
         this.eIndex = 0;
         this.dIndex = 0;
     }
+
     isEmpty() {
         return this.eIndex == this.dIndex;
     }
+
     enqueue(val) {
         if (this.eIndex + 1 === this.dIndex || (this.eIndex + 1 === this.maxSize && this.dIndex === 0)) {
-            /*console.log("data", {
+            console.log("data", {
                 e: this.eIndex,
                 d: this.dIndex,
                 maxSize: this.maxSize,
                 picNo: this.picNo,
-            })*/
+            });
             throw "Queue overflow";
         }
         this.container[this.eIndex++] = val;
         if (this.eIndex == this.maxSize)
             this.eIndex = 0;
     }
+
     dequeue() {
         if (this.dIndex == this.maxSize)
             this.dIndex = 0;

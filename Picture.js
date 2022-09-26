@@ -1,7 +1,8 @@
 class Picture extends Resource {
 
-    constructor(rawData) {
+    constructor(rawData, picNo) {
         super();
+        this.picNo = picNo;
         this.stream = new ByteStream(rawData);
         this.picEnabled = false;
         this.priEnabled = false;
@@ -24,7 +25,7 @@ class Picture extends Resource {
         this.priority = new Uint8Array(160 * 168);
 
         // Clear the buffers
-        for (var i = 0; i < 160 * 168; i++) {
+        for (let i = 0; i < 160 * 168; i++) {
             this.visible[i] = 0x0F;
             this.priority[i] = 0x04;
         }
@@ -152,52 +153,57 @@ class Picture extends Resource {
     }
 
     opFillFastQueue() {
-        while (true) {
-            let queue = new FastQueue();
-            let startX = this.stream.readByte();
-            if (startX >= 0xF0)
-                break;
-            let startY = this.stream.readByte();
-            queue.enqueue(startX);
-            queue.enqueue(startY);
+        try {
+            while (true) {
+                let queue = new FastQueue(this.picNo);
+                let startX = this.stream.readByte();
+                if (startX >= 0xF0)
+                    break;
+                let startY = this.stream.readByte();
+                queue.enqueue(startX);
+                queue.enqueue(startY);
 
-            // Visible
-            var pos;
-            var x;
-            var y;
-            while (!queue.isEmpty()) {
-                x = queue.dequeue();
-                y = queue.dequeue();
-                if (this.picEnabled) {
-                    if (this.visible[y * 160 + x] != 0x0F) {
-                        continue;
+                // Visible
+                var pos;
+                var x;
+                var y;
+                while (!queue.isEmpty()) {
+                    x = queue.dequeue();
+                    y = queue.dequeue();
+                    if (this.picEnabled) {
+                        if (this.visible[y * 160 + x] != 0x0F) {
+                            continue;
+                        }
+                        this.setPixel(x, y, true, false);
                     }
-                    this.setPixel(x, y, true, false);
-                }
-                if (this.priEnabled) {
-                    if (this.priority[y * 168 + x] != 0x04)
-                        continue;
-                    this.setPixel(x, y, false, true);
-                }
-                if (x > 0) {
-                    queue.enqueue(x - 1);
-                    queue.enqueue(y);
-                }
-                if (x < 160 - 1) {
-                    queue.enqueue(x + 1);
-                    queue.enqueue(y);
-                }
-                if (y > 0) {
-                    queue.enqueue(x);
-                    queue.enqueue(y - 1);
-                }
-                if (y < 168 - 1) {
-                    queue.enqueue(x);
-                    queue.enqueue(y + 1);
+                    if (this.priEnabled) {
+                        if (this.priority[y * 168 + x] != 0x04) {
+                            continue;
+                        }
+                        this.setPixel(x, y, false, true);
+                    }
+                    if (x > 0) {
+                        queue.enqueue(x - 1);
+                        queue.enqueue(y);
+                    }
+                    if (x < 160 - 1) {
+                        queue.enqueue(x + 1);
+                        queue.enqueue(y);
+                    }
+                    if (y > 0) {
+                        queue.enqueue(x);
+                        queue.enqueue(y - 1);
+                    }
+                    if (y < 168 - 1) {
+                        queue.enqueue(x);
+                        queue.enqueue(y + 1);
+                    }
                 }
             }
+            this.stream.position--;
+        } catch (e) {
+            //noop
         }
-        this.stream.position--;
     }
 
     opSetPen() {
@@ -307,7 +313,8 @@ class Picture extends Resource {
 }
 
 class FastQueue {
-    constructor() {
+    constructor(picNo) {
+        this.picNo = picNo;
         this.maxSize = 8000;
         this.container = new Uint8Array(this.maxSize);
         this.eIndex = 0;
@@ -317,8 +324,15 @@ class FastQueue {
         return this.eIndex == this.dIndex;
     }
     enqueue(val) {
-        if (this.eIndex + 1 == this.dIndex || (this.eIndex + 1 == this.maxSize && this.dIndex == 0))
+        if (this.eIndex + 1 === this.dIndex || (this.eIndex + 1 === this.maxSize && this.dIndex === 0)) {
+            /*console.log("data", {
+                e: this.eIndex,
+                d: this.dIndex,
+                maxSize: this.maxSize,
+                picNo: this.picNo,
+            })*/
             throw "Queue overflow";
+        }
         this.container[this.eIndex++] = val;
         if (this.eIndex == this.maxSize)
             this.eIndex = 0;

@@ -101,6 +101,7 @@ class Interpreter {
             this.updateObjectDirections();
 
 
+            console.log("******before done new room!*****");
             // Continue scanning LOGIC 0 while the return value is above 0, indicating a room change.
             while (this.newRoom(this.commands.executeLogic(0))) ;
 

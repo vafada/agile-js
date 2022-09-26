@@ -101,7 +101,7 @@ class Game {
                             break;
 
                         case "PICDIR":
-                            this.volumes[volNum].pictures[index] = new Picture(resourceBuffer);
+                            this.volumes[volNum].pictures[index] = new Picture(resourceBuffer, index);
                             break;
 
                         case "VIEWDIR":

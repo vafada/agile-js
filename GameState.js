@@ -265,9 +265,19 @@ class GameState {
     }
 
     restoreBackgrounds(restoreList) {
-        for (let aniObj of restoreList) {
-            aniObj.reset(true);
+        if (restoreList == null) {
+            // If no list specified, then restore update list then stopped list.
+            this.restoreBackgrounds(this.updateObjectList);
+            this.restoreBackgrounds(this.stoppedObjectList);
+        } else {
+            for (let aniObj of restoreList) {
+                aniObj.reset(true);
+            }
         }
+    }
+
+    makeStoppedObjectList() {
+        return this.makeObjectDrawList(this.stoppedObjectList, false);
     }
 
     makeUpdateObjectList() {
@@ -286,31 +296,32 @@ class GameState {
         objsToDraw.sort((a, b) => {
             if (a.priority < b.priority) {
                 return -1;
-            }
-            else if (a.priority > b.priority) {
+            } else if (a.priority > b.priority) {
                 return 1;
-            }
-            else {
+            } else {
                 if (a.effectiveY() < b.effectiveY()) {
                     return -1;
-                }
-                else if (a.effectiveY() > b.effectiveY()) {
+                } else if (a.effectiveY() > b.effectiveY()) {
                     return 1;
-                }
-                else {
+                } else {
                     return 0;
                 }
             }
         })
 
 
-
         return objsToDraw;
     }
 
     drawObjects(objectDrawList) {
-        for (let aniObj of objectDrawList) {
-            aniObj.draw();
+        if (objectDrawList == null) {
+            // If no list specified, then draw stopped list then update list.
+            this.drawObjects(this.makeStoppedObjectList());
+            this.drawObjects(this.makeUpdateObjectList());
+        } else {
+            for (let aniObj of objectDrawList) {
+                aniObj.draw();
+            }
         }
     }
 
@@ -318,19 +329,36 @@ class GameState {
         for (let aniObj of objectShowList) {
             aniObj.show(pixels);
 
-            if (aniObj.stepTimeCount === aniObj.stepTime)
-            {
-                if ((aniObj.x === aniObj.prevX) && (aniObj.y === aniObj.prevY))
-                {
+            if (aniObj.stepTimeCount === aniObj.stepTime) {
+                if ((aniObj.x === aniObj.prevX) && (aniObj.y === aniObj.prevY)) {
                     aniObj.stopped = true;
-                }
-                else
-                {
+                } else {
                     aniObj.prevX = aniObj.x;
                     aniObj.prevY = aniObj.y;
                     aniObj.stopped = false;
                 }
             }
+        }
+    }
+
+    /**
+     * Resets the four resources types back to their new room state. The main reason for doing
+     * this is to support the script event buffer.
+     */
+    resetResources() {
+        for (let i = 0; i < 256; i++) {
+            // For Logics and Views, number 0 is never unloaded.
+            if (i > 0) {
+                if (this.logics[i] != null) {
+                    this.logics[i].isLoaded = false;
+                }
+                if (this.views[i] != null) {
+                    this.views[i].isLoaded = false;
+                }
+            }
+
+            if (this.pictures[i] != null) this.pictures[i].isLoaded = false;
+            if (this.sounds[i] != null) this.sounds[i].isLoaded = false;
         }
     }
 }

@@ -100,8 +100,11 @@ class Interpreter {
             // allow ego's direction to be known to the logics even when ego is on a move.obj().
             this.updateObjectDirections();
 
+
             // Continue scanning LOGIC 0 while the return value is above 0, indicating a room change.
             while (this.newRoom(this.commands.executeLogic(0))) ;
+
+            console.log("******done new room!*****");
 
             // Set ego's direction from the variable.
             this.ego.direction = this.state.vars[Defines.EGODIR];
@@ -184,6 +187,7 @@ class Interpreter {
 
         // Current room logic is loaded automatically on room change and not directly by load.logic
         let logic = this.state.logics[roomNum];
+        console.log("new room logic = ", roomNum, logic);
         logic.isLoaded = true;
         this.state.scriptBuffer.addScript("LoadLogic", logic.index);
 
@@ -247,6 +251,7 @@ class Interpreter {
      * involves the cell cycling, the movement, and the drawing to the screen.
      */
     animateObjects() {
+        console.log("this.state.animatedObjects = " + this.state.animatedObjects);
         // Ask each AnimatedObject to update its loop and cell number if required.
         for (let aniObj of this.state.animatedObjects) {
             aniObj.updateLoopAndCel();

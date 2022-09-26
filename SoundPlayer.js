@@ -7,4 +7,8 @@ class SoundPlayer {
     stopSound() {
         // TODO
     }
+
+    playSound() {
+        // TODO
+    }
 }

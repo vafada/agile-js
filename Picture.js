@@ -29,7 +29,7 @@ class Picture extends Resource {
         if (this.picEnabled && drawVis)
             this.visible[y * 160 + x] = this.picColor;
         if (this.priEnabled && drawPri)
-            this.priority[y * 168 + x] = this.priColor;
+            this.priority[y * 160 + x] = this.priColor;
     }
 
     round(aNumber, dirn) {

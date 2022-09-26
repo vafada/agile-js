@@ -10,8 +10,14 @@ class Game {
         return Promise.all([
             this.readObjectFile(),
             this.readWordsFile(),
-            this.readV2Resources()
+            this.readV2Resources(),
+            this.readFont(),
         ]);
+    }
+
+    async readFont() {
+        let rawObjectData = await this.fetchFile("font.bin");
+        this.fonts = new Fonts(new Uint8Array(rawObjectData));
     }
 
     async readObjectFile() {
